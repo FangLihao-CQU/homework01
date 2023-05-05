@@ -55,15 +55,13 @@ image rgb_to_grayscale(image im)
     assert(im.c == 3);
     image gray = make_image(im.w, im.h, 1);
     // TODO Fill this in
+    float value;
     for (int x = 0; x < im.w; x++)
     {
         for (int y = 0; y < im.h; y++)
         {
-            int location;
-            float value;
-            location = x + im.w * y;                                                                                  // 计算像素所在位置
             value = 0.299 * get_pixel(im, x, y, 0) + 0.587 * get_pixel(im, x, y, 1) + 0.114 * get_pixel(im, x, y, 2); // 计算对应位置灰度值
-            gray.data[location] = value;
+            set_pixel(gray, x, y, 0, value);
         }
     }
     return gray;
@@ -72,15 +70,13 @@ image rgb_to_grayscale(image im)
 void shift_image(image im, int c, float v)
 {
     // TODO Fill this in
-    int location;
     float value;
     for (int x = 0; x < im.w; x++)
     {
         for (int y = 0; y < im.h; y++)
         {
-            location = x + im.w * y + im.w * im.h * c; // 计算像素所在位置
-            value = v + get_pixel(im, x, y, c);        // 计算变化后像素值
-            im.data[location] = value;
+            value = v + get_pixel(im, x, y, c); // 计算变化后像素值
+            set_pixel(im, x, y, c, value);
         }
     }
 }
@@ -88,7 +84,6 @@ void shift_image(image im, int c, float v)
 void clamp_image(image im)
 {
     // TODO Fill this in
-    int location;
     float value;
     for (int x = 0; x < im.w; x++)
     {
@@ -96,8 +91,7 @@ void clamp_image(image im)
         {
             for (int c = 0; c < im.c; c++)
             {
-                location = x + im.w * y + im.w * im.h * c; // 计算像素所在位置
-                value = get_pixel(im, x, y, c);            // 计算变化后像素值
+                value = get_pixel(im, x, y, c); // 计算变化后像素值
                 if (value > 1)
                 {
                     value = 1;
@@ -106,7 +100,7 @@ void clamp_image(image im)
                 {
                     value = 0;
                 }
-                im.data[location] = value;
+                set_pixel(im, x, y, c, value);
             }
         }
     }
@@ -116,14 +110,14 @@ void clamp_image(image im)
 float three_way_max(float a, float b, float c)
 {
     return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
-}
+} // 返回值为最大值
 
 float three_way_min(float a, float b, float c)
 {
     return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
-}
+} // 返回值为最小值
 
-void rgb_to_hsv(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
+void rgb_to_hsv(image im) // h:0-1.0 s:0.0-1.0 v:0.0-1.0
 {
     // TODO Fill this in
     float r, g, b, h, s, v, hp, m, c;
@@ -145,7 +139,6 @@ void rgb_to_hsv(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
             {
                 s = c / v;
             }
-
             if (c == 0)
             {
                 h = 0;
@@ -160,7 +153,7 @@ void rgb_to_hsv(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
                 {
                     hp = ((b - r) / c) + 2;
                 }
-                else
+                else if (v == b)
                 {
                     hp = ((r - g) / c) + 4;
                 }
@@ -180,10 +173,10 @@ void rgb_to_hsv(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
     }
 }
 
-void hsv_to_rgb(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
+void hsv_to_rgb(image im) // h:0-1.0 s:0.0-1.0 v:0.0-1.0 hp:0-360
 {
     // TODO Fill this in
-    float h, s, v, r, g, b;
+    float h, s, v, r, g, b, hp;
     for (int x = 0; x < im.w; x++)
     {
         for (int y = 0; y < im.h; y++)
@@ -191,15 +184,16 @@ void hsv_to_rgb(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
             h = get_pixel(im, x, y, 0);
             s = get_pixel(im, x, y, 1);
             v = get_pixel(im, x, y, 2);
+            hp = h * 360;
             if (s == 0)
             {
                 r = g = b = v;
             }
             else
             {
-                h = h / 60;
-                int i = (int)h;
-                float C = h - i;
+                hp = hp / 60;
+                int i = (int)hp;
+                float C = hp - i;
                 float X = v * (1 - s);
                 float Y = v * (1 - s * C);
                 float Z = v * (1 - s * (1 - C));
@@ -250,6 +244,5 @@ void hsv_to_rgb(image im) // h:0-360 s:0.0-1.0 v:0.0-1.0
 1.对图像存储方式不清楚，通过‘速览定义’功能解决
 2.对像素值范围不清楚，通过查阅文件、github解决
 3.对变量类型不清楚，像素值应为float，使用int会损失精度，多次尝试以及阅读代码后解决
-4.不了解rgb to hsv/hsv to rgb公式，查阅资料后解决
-部分代码思路参考了 https://github.com/pjreddie/vision-hw0#cse-455-homework-0 的讲解
+4.不了解rgb to hsv/hsv to rgb公式及算法，查阅资料后解决
 */
