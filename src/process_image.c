@@ -46,8 +46,23 @@ image copy_image(image im)
 {
     image copy = make_image(im.w, im.h, im.c);
     // TODO Fill this in
-    copy.data = im.data; // 可直接拷贝原图像数据，不用逐个读出
-    return copy;         // 返回拷贝后图像
+    // copy.data = im.data; // 可直接拷贝原图像数据，不用逐个读出
+    // return copy;         // 返回拷贝后图像
+    float value;
+    for (int x = 0; x < im.w; x++)
+    {
+        for (int y = 0; y < im.h; y++)
+        {
+            for (int c = 0; c < im.c; c++)
+            {
+                value = get_pixel(im,x,y,c);
+                set_pixel(copy,x,y,c,value);
+            }
+            
+        }
+    }
+    return copy;
+    
 }
 
 image rgb_to_grayscale(image im)
